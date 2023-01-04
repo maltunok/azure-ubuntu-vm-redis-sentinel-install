@@ -35,7 +35,7 @@ masterauth Passw0rd!
 bind 0.0.0.0
 requirepass Passw0rd!
 masterauth Passw0rd!
-replicaof 4.231.58.253 6379
+replicaof <MASTER_NODE_IP> 6379
 
 4. Restart the redis-server service.
    sudo service redis-server restart
@@ -45,9 +45,9 @@ replicaof 4.231.58.253 6379
 1. Connect to the master server and each replica server over SSH.
 2. Run the following commands. Change <MASTER_NODE_IP> to the IP address of the master node. Change <REPLICA_1_NODE_IP> to the IP address of the replica-1 node. Change <REPLICA_2_NODE_IP> to the IP address of the replica-2 node.
 
-sudo ufw allow from 4.231.58.253 to any port 6379 comment 'MASTER'
-sudo ufw allow from 4.231.57.20 to any port 6379 comment 'REPLICA-1'
-sudo ufw allow from 4.231.59.17 to any port 6379 comment 'REPLICA-2'
+sudo ufw allow from <MASTER_NODE_IP> to any port 6379 comment 'MASTER'
+sudo ufw allow from <REPLICA_1_NODE_IP> to any port 6379 comment 'REPLICA-1'
+sudo ufw allow from <REPLICA_2_NODE_IP> to any port 6379 comment 'REPLICA-2'
 
 # CHECK THE MASTER-REPLICA SETUP
 
@@ -62,10 +62,10 @@ sudo ufw allow from 4.231.59.17 to any port 6379 comment 'REPLICA-2'
    704:M 01 Oct 2022 09:20:58.524 _ Done loading RDB, keys loaded: 1, keys expired: 0.
    704:M 01 Oct 2022 09:20:58.525 _ DB loaded from disk: 0.002 seconds
    704:M 01 Oct 2022 09:20:58.525 _ Ready to accept connections
-   704:M 01 Oct 2022 09:20:59.353 _ Replica 139.180.217.55:6379 asks for synchronization
-   704:M 01 Oct 2022 09:20:59.353 _ Partial resynchronization request from 139.180.217.55:6379 accepted. Sending 0 bytes of backlog starting from offset 2873.
-   704:M 01 Oct 2022 09:20:59.435 _ Replica 139.180.156.164:6379 asks for synchronization
-   704:M 01 Oct 2022 09:20:59.435 _ Partial resynchronization request from 139.180.156.164:6379 accepted. Sending 0 bytes of backlog starting from offset 2873.
+   704:M 01 Oct 2022 09:20:59.353 _ Replica XXX:6379 asks for synchronization
+   704:M 01 Oct 2022 09:20:59.353 _ Partial resynchronization request from XXX:6379 accepted. Sending 0 bytes of backlog starting from offset 2873.
+   704:M 01 Oct 2022 09:20:59.435 _ Replica XXX:6379 asks for synchronization
+   704:M 01 Oct 2022 09:20:59.435 _ Partial resynchronization request from XXX:6379 accepted. Sending 0 bytes of backlog starting from offset 2873.
 
 4. Run Redis CLI to connect to the Redis server.
    redis-cli
@@ -82,8 +82,8 @@ sudo ufw allow from 4.231.59.17 to any port 6379 comment 'REPLICA-2'
 
 role:master
 connected_slaves:2
-slave0:ip=139.180.217.55,port=6379,state=online,offset=14,lag=1
-slave1:ip=139.180.156.164,port=6379,state=online,offset=14,lag=1
+slave0:ip=XXX,port=6379,state=online,offset=14,lag=1
+slave1:ip=XXX,port=6379,state=online,offset=14,lag=1
 master_failover_state:no-failover
 master_replid:43855ff334c072ee5a3f4db39b1b27b31f55a3a4
 master_replid2:0000000000000000000000000000000000000000
@@ -120,7 +120,7 @@ repl_backlog_histlen:14
 
 4. Find the line sentinel monitor mymaster 127.0.0.1 6379 2, and edit them as follows. Change <YOUR_PASSWORD> to the same password on master node. Change <MASTER_NODE_IP> to the IP address of the master node.
 
-sentinel monitor mymaster 4.231.58.253 6379 2
+sentinel monitor mymaster <MASTER_NODE_IP> 6379 2
 sentinel auth-pass mymaster Passw0rd!
 sentinel down-after-milliseconds mymaster 5000
 sentinel failover-timeout mymaster 60000
@@ -135,9 +135,9 @@ protected-mode no
 
 2. Run the following commands. Change <MASTER_NODE_IP> to the IP address of the master node. Change <REPLICA_1_NODE_IP> to the IP address of the replica-1 node. Change <REPLICA_2_NODE_IP> to the IP address of the replica-2 node.
 
-sudo ufw allow from 4.231.58.253 to any port 26379 comment 'SENTINEL'
-sudo ufw allow from 4.231.57.20 to any port 26379 comment 'SENTINEL'
-sudo ufw allow from 4.231.59.17 to any port 26379 comment 'SENTINEL'
+sudo ufw allow from <MASTER_NODE_IP> to any port 26379 comment 'SENTINEL'
+sudo ufw allow from <REPLICA_1_NODE_IP> to any port 26379 comment 'SENTINEL'
+sudo ufw allow from <REPLICA_2_NODE_IP> to any port 26379 comment 'SENTINEL'
 
 # CHECK THE SENTINEL SETUP
 
@@ -174,7 +174,7 @@ sentinel_tilt_since_seconds:-1
 sentinel_running_scripts:0
 sentinel_scripts_queue_length:0
 sentinel_simulate_failure_flags:0
-master0:name=mymaster,status=ok,address=45.32.121.40:6379,slaves=2,sentinels=3
+master0:name=mymaster,status=ok,address=<MASTER_NODE_IP>:6379,slaves=2,sentinels=3
 
 # TEST THE FAILOVER
 
@@ -193,19 +193,19 @@ This section shows how to test the failover by stopping the Redis master node ma
 
 5. Here is an example result. The Sentinel starts a failover process and promotes a replica to be the new master.
    5222:X 01 Oct 2022 18:59:38.903 # +sdown sentinel e5b67f1e144dedf55cf71e60df52489debfdcb9d 45.32.121.40 26379 @ mymaster 45.32.121.40 6379
-   5222:X 01 Oct 2022 18:59:39.836 # +sdown master mymaster 45.32.121.40 6379
+   5222:X 01 Oct 2022 18:59:39.836 # +sdown master mymaster XXX 6379
    5222:X 01 Oct 2022 18:59:39.958 _ Sentinel new configuration saved on disk
    5222:X 01 Oct 2022 18:59:39.958 # +new-epoch 3
    5222:X 01 Oct 2022 18:59:39.959 _ Sentinel new configuration saved on disk
    5222:X 01 Oct 2022 18:59:39.960 # +vote-for-leader 852870198de5b3ced3abd82b8f85cd4866c7921c 3
-   5222:X 01 Oct 2022 18:59:40.975 # +odown master mymaster 45.32.121.40 6379 #quorum 2/2
+   5222:X 01 Oct 2022 18:59:40.975 # +odown master mymaster XXX 6379 #quorum 2/2
    5222:X 01 Oct 2022 18:59:40.976 # Next failover delay: I will not start a failover before Sat Oct 1 19:01:40 2022
-   5222:X 01 Oct 2022 18:59:41.028 # +config-update-from sentinel 852870198de5b3ced3abd82b8f85cd4866c7921c 139.180.156.164 26379 @ mymaster 45.32.121.40 6379
-   5222:X 01 Oct 2022 18:59:41.028 # +switch-master mymaster 45.32.121.40 6379 139.180.217.55 6379
-   5222:X 01 Oct 2022 18:59:41.028 _ +slave slave 139.180.156.164:6379 139.180.156.164 6379 @ mymaster 139.180.217.55 6379
-   5222:X 01 Oct 2022 18:59:41.029 _ +slave slave 45.32.121.40:6379 45.32.121.40 6379 @ mymaster 139.180.217.55 6379
+   5222:X 01 Oct 2022 18:59:41.028 # +config-update-from sentinel 852870198de5b3ced3abd82b8f85cd4866c7921c XXX 26379 @ mymaster XXX 6379
+   5222:X 01 Oct 2022 18:59:41.028 # +switch-master mymaster XXX 6379 XXX 6379
+   5222:X 01 Oct 2022 18:59:41.028 _ +slave slave XXX:6379 XXX 6379 @ mymaster XXX 6379
+   5222:X 01 Oct 2022 18:59:41.029 _ +slave slave XXX:6379 XXX 6379 @ mymaster XXX 6379
    5222:X 01 Oct 2022 18:59:41.030 \* Sentinel new configuration saved on disk
-   5222:X 01 Oct 2022 18:59:46.128 # +sdown slave 45.32.121.40:6379 45.32.121.40 6379 @ mymaster 139.180.217.55 6379
+   5222:X 01 Oct 2022 18:59:46.128 # +sdown slave XXX:6379 XXX 6379 @ mymaster XXX 6379
 
 6. Run Redis CLI to connect to the Redis Sentinel server.
    redis-cli -p 26379
@@ -215,5 +215,5 @@ This section shows how to test the failover by stopping the Redis master node ma
 
 8. Here is an example result with the IP address and port of the master node.
 
-1) "139.180.217.55"
+1) "XXX"
 2) "6379"
